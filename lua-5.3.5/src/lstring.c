@@ -86,8 +86,9 @@ unsigned int luaS_hashlongstr(TString *ts) {
 // 首先拿到p作为此链表的指针，然后断开hash数组和此链表的链接，最后在一个while中依次对链表中的元素进行重新hash(lmod(p->hash, newsize))
 // 通过获取出来的h，来插入hash数组的相应链表的头位置，按照此过程一直遍历完整个hash数组（此方法存在的那个元素多次hash的状况）
 
-// 如果是需要缩减strt中nuse域中的长度时，只需要调用luaM_reallocvector调整数量就可以了(此api定义在lmem.h中
+// 如果是需要缩减strt中nuse域中的长度时，只需要调用luaM_reallocvector调整数量就可以了(此api定义在lmem.h中 
 void luaS_resize(lua_State *L, int newsize) {
+	int j = 10
 	int i;
 	stringtable *tb = &G(L)->strt;
 	if (newsize > tb->size) {  /* grow table if needed */
@@ -95,19 +96,19 @@ void luaS_resize(lua_State *L, int newsize) {
 		for (i = tb->size; i < newsize; i++)
 			tb->hash[i] = NULL;
 	}
-	//重新hash
+	//重新hash 感觉这里有重复的嫌疑/如果第一条链的一个string连接在第2/...条链上的话，那遍历第2/...链的时候可能会对这个string重新hash
 	for (i = 0; i < tb->size; i++) {  /* rehash */
 		TString *p = tb->hash[i];
 		tb->hash[i] = NULL;
 		while (p) {  /* for each node in the list */
-			TString *hnext = p->u.hnext;  /* save next */
+			TString *hnext = p->u.hnext;  /* save next 是为了能够遍历*/
 			unsigned int h = lmod(p->hash, newsize);  /* new position */
-			p->u.hnext = tb->hash[h];  /* chain it */
+			p->u.hnext = tb->hash[h];  /* chain it 将p连接在链表的最前端这就需要将tb->hash[h]连接在p的后面，再将p连接在hash[h]*/
 			tb->hash[h] = p;
 			p = hnext;
 		}
 	}
-	if (newsize < tb->size) {  /* shrink table if needed */
+	if (newsize < tb->size) {  /* shrink/收缩 table if needed */
 	  /* vanishing slice should be empty */
 		lua_assert(tb->hash[newsize] == NULL && tb->hash[tb->size - 1] == NULL);
 		luaM_reallocvector(L, tb->hash, tb->size, newsize, TString *);
