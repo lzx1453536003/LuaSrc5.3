@@ -12,7 +12,7 @@
 #include "lstate.h"
 
 
-#define sizelstring(l)  (sizeof(union UTString) + ((l) + 1) * sizeof(char))
+#define sizelstring(l)  (sizeof(union UTString) + ((l) + 1) * sizeof(char)) //+1是因为有'/0'
 
 #define sizeludata(l)	(sizeof(union UUdata) + (l))
 #define sizeudata(u)	sizeludata((u)->len)
