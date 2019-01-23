@@ -487,7 +487,8 @@ typedef union Closure {
 /*
 ** Tables
 */
-
+// 在任何时候TKey的类型只有两个，要么是整数，要么不是整数（非nil）
+// next在之前的版本是 struct Node *next; 类型的，5.3换成了int类型，是一个偏移。next指向冲突的下一个节点
 typedef union TKey {
 	struct {
 		TValuefields;
@@ -503,13 +504,21 @@ typedef union TKey {
 	  k_->nk.value_ = io_->value_; k_->nk.tt_ = io_->tt_; \
 	  (void)L; checkliveness(L,io_); }
 
-
+// 此自定义的Node节点就是table的节点值
 typedef struct Node {
 	TValue i_val;
 	TKey i_key;
 } Node;
 
 
+// flags表示此table中存在哪些元方法，默认是0。元方法对应的bit定义在ltm.h中
+// lsizenode是该表中以2为底的散列表大小的对数值。
+// sizearray是数组部分的大小
+// *array指向数组部分的指针
+// *node指向散列表起始位置的指针
+// *lastfree指向散列表最后位置的指针
+// *metatable存放该表的元表
+// *gclist：GC相关的链表
 typedef struct Table {
 	CommonHeader;
 	lu_byte flags;  /* 1<<p means tagmethod(p) is not present */
