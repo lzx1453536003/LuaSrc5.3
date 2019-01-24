@@ -510,13 +510,17 @@ typedef struct Node {
 	TKey i_key;
 } Node;
 
-
+/*
+	更具自己不成熟的分析，table表的hash部分并不像全局字符串的hashtable来解决冲突
+	table的hash部分解决冲突应该是开放寻址法
+	stringtable 解决冲突的方式应该是链接法
+*/
 // flags表示此table中存在哪些元方法，默认是0。元方法对应的bit定义在ltm.h中
 // lsizenode是该表中以2为底的散列表大小的对数值。
 // sizearray是数组部分的大小
 // *array指向数组部分的指针
 // *node指向散列表起始位置的指针
-// *lastfree指向散列表最后位置的指针
+// *lastfree指向散列表最后位置的指针（目前感觉像是指向最后的的一个freeNode后面的一个节点）
 // *metatable存放该表的元表
 // *gclist：GC相关的链表
 typedef struct Table {
@@ -526,7 +530,7 @@ typedef struct Table {
 	unsigned int sizearray;  /* size of 'array' array */
 	TValue *array;  /* array part */
 	Node *node;
-	Node *lastfree;  /* any free position is before this position */
+	Node *lastfree;  /* any free position is before this position 指向最后一个node的后面一个位置*/
 	struct Table *metatable;
 	GCObject *gclist;
 } Table;
@@ -534,8 +538,9 @@ typedef struct Table {
 
 
 /*
-** 'module' operation for hashing (size is always a power of 2)
+** 'module' operation for hashing (size is always a power of 2) 用来散列的模块操作
 */
+//(size&(size-1))==0 判断size是否是2的指数
 #define lmod(s,size) \
 	(check_exp((size&(size-1))==0, (cast(int, (s) & ((size)-1)))))
 

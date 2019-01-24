@@ -4,6 +4,15 @@
 ** See Copyright Notice in lua.h
 */
 
+/*
+	插入为整数的key值时，先判断key所在的区间[1, 2^n]是否满足table表里所有的整数的数量大于2^(n-1)，
+	如果不成立则放在hash表中，这样主要是为了节约空间，并且可以进行空间的动态扩张
+
+	注意:
+		尽量避免数组部分和散列部分混合使用
+		尽量避免重散列
+*/
+
 #ifndef ltable_h
 #define ltable_h
 
