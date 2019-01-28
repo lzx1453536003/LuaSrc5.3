@@ -210,9 +210,9 @@ LUA_API const void     *(lua_topointer) (lua_State *L, int idx);
 
 LUA_API void  (lua_arith) (lua_State *L, int op);
 
-#define LUA_OPEQ	0
-#define LUA_OPLT	1
-#define LUA_OPLE	2
+#define LUA_OPEQ	0		//等于
+#define LUA_OPLT	1		//小于
+#define LUA_OPLE	2		//大于
 
 LUA_API int   (lua_rawequal) (lua_State *L, int idx1, int idx2);
 LUA_API int   (lua_compare) (lua_State *L, int idx1, int idx2, int op);
