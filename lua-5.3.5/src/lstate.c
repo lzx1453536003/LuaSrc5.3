@@ -150,14 +150,16 @@ void luaE_shrinkCI(lua_State *L) {
 
 static void stack_init(lua_State *L1, lua_State *L) {
 	int i; CallInfo *ci;
-	/* initialize stack array */
+	/* initialize stack array  为数据栈分配空间，并且初始化lua_State与数据栈相关的成员*/
+	//数据栈实质就是一个动态数组
 	L1->stack = luaM_newvector(L, BASIC_STACK_SIZE, TValue);
 	L1->stacksize = BASIC_STACK_SIZE;
 	for (i = 0; i < BASIC_STACK_SIZE; i++)
 		setnilvalue(L1->stack + i);  /* erase new stack */
 	L1->top = L1->stack;
 	L1->stack_last = L1->stack + L1->stacksize - EXTRA_STACK;
-	/* initialize first ci */
+	/* initialize first ci 初始化lua_State与调用链表相关的成员*/
+	// 调用栈实质上是一个双向链表
 	ci = &L1->base_ci;
 	ci->next = ci->previous = NULL;
 	ci->callstatus = 0;

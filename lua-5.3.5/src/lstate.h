@@ -65,18 +65,19 @@ struct lua_longjmp;  /* defined in ldo.c */
 #define EXTRA_STACK   5
 
 
-#define BASIC_STACK_SIZE        (2*LUA_MINSTACK)
+#define BASIC_STACK_SIZE        (2*LUA_MINSTACK)	//2*40
 
 
 /* kinds of Garbage Collection */
-#define KGC_NORMAL	0
-#define KGC_EMERGENCY	1	/* gc was forced by an allocation failure */
+//GC机制
+#define KGC_NORMAL	0	//普通模式
+#define KGC_EMERGENCY	1	/* gc was forced by an allocation failure */ //紧急模式
 
 
 typedef struct stringtable {
 	TString **hash;
-	int nuse;  /* number of elements */
-	int size;
+	int nuse;  /* number of elements */ //使用的，也就是现在又多少个string
+	int size;	//肯定2的指数 //hash表的可容纳string的大小
 } stringtable;
 
 
@@ -105,8 +106,8 @@ typedef struct CallInfo {
 		} c;
 	} u;
 	ptrdiff_t extra;
-	short nresults;  /* expected number of results from this function */
-	unsigned short callstatus;
+	short nresults;  /* expected number of results from this function 当前被调用的函数期待返回结果的数量*/
+	unsigned short callstatus; //用来标识当前调用的是C函数还是Lua函数
 } CallInfo;
 
 
@@ -175,16 +176,21 @@ typedef struct global_State {
 /*
 ** 'per thread' state
 */
+// lua_State中主要包含两个重要的数据结构，一个是数据栈，另外一个是调用栈
 struct lua_State {
 	CommonHeader;
 	unsigned short nci;  /* number of items in 'ci' list */
-	lu_byte status;
+	lu_byte status;		// 一个thread实际上就是一个代码指令顺序执行的地方，
+						//而这，本质上是一个状态机(state machine)，状态机执行的过程中会处于各种中间步骤，
+						//所以每个步骤都算一种status。（ps, state和status常常混淆了可见lua_State->status可以作为一个记忆关键字）
 	StkId top;  /* first free slot in the stack */
 	global_State *l_G;
-	CallInfo *ci;  /* call info for current function */
+	CallInfo *ci;  /* call info for current function 当前正在调用的函数的运行状态*/
+	
+	//一个thread的运行过程，就是一个死循环解释执行指令的过程，必不可少的会有一个指针指向最后一次执行的指令的指针：const Instruction *oldpc;
 	const Instruction *oldpc;  /* last pc traced */
-	StkId stack_last;  /* last free slot in the stack */
-	StkId stack;  /* stack base */
+	StkId stack_last;  /* last free slot in the stack -指向数据栈中，最后一个可使用的空间*/
+	StkId stack;  /* stack base 数据栈开始的位置*/
 	UpVal *openupval;  /* list of open upvalues in this stack */
 	GCObject *gclist;
 	struct lua_State *twups;  /* list of threads with open upvalues */

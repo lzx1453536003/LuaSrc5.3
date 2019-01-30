@@ -35,7 +35,7 @@ const char lua_ident[] =
 "$LuaVersion: " LUA_COPYRIGHT " $"
 "$LuaAuthors: " LUA_AUTHORS " $";
 
-
+//下面的有几个宏定义目前不知道是干什么的
 /* value at a non-valid index */
 #define NONVALIDVALUE		cast(TValue *, luaO_nilobject)
 
